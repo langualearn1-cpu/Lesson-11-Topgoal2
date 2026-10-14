@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Do you remember? - ورقة عمل تفاعلية ناطقة (صفحة 8)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;900&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #ecfeff 0%, #fef3c7 45%, #f0fdf4 100%);
+      min-height: 100vh;
+      color: #1e293b;
+      touch-action: manipulation;
+    }
+
+    .en-font {
+      font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+    }
+    .handwriting-font {
+      font-family: 'Kalam', cursive;
+    }
+
+    /* Page Container Frame */
+    .sheet-card {
+      background: #ffffff;
+      border: 4px solid #14b8a6;
+      border-radius: 28px;
+      box-shadow: 0 20px 45px -15px rgba(20, 184, 166, 0.3), 0 0 0 8px #ccfbf1;
+    }
+
+    /* Dotted Drop Slot */
+    .drop-slot {
+      min-height: 38px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .drop-slot.drag-over {
+      background-color: #fef08a !important;
+      border-color: #f59e0b !important;
+      transform: scale(1.04);
+    }
+
+    /* Draggable Pills */
+    .word-pill {
+      cursor: grab;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .word-pill:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+    .word-pill.selected-pill {
+      box-shadow: 0 0 0 4px #fbbf24, 0 10px 20px -3px rgba(245, 158, 11, 0.4);
+      transform: translateY(-3px) scale(1.06);
+      animation: pulseSelection 1.5s infinite;
+    }
+    @keyframes pulseSelection {
+      0%, 100% { box-shadow: 0 0 0 4px #fbbf24; }
+      50% { box-shadow: 0 0 0 7px #f59e0b; }
+    }
+    .word-pill.used-pill {
+      opacity: 0.38;
+      pointer-events: none;
+      filter: grayscale(70%);
+      transform: scale(0.94);
+      border-style: dashed;
+    }
+
+    /* Lined Spiral Notebook for Writing Exercise */
+    .spiral-notebook {
+      background-color: #fffefb;
+      background-image: repeating-linear-gradient(transparent, transparent 31px, #e2e8f0 31px, #e2e8f0 33px);
+      line-height: 33px;
+      box-shadow: 4px 6px 15px rgba(0,0,0,0.06);
+    }
+    .spiral-ring {
+      width: 14px;
+      height: 24px;
+      background: linear-gradient(135deg, #64748b 0%, #cbd5e1 50%, #475569 100%);
+      border-radius: 7px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Feedback Animations */
+    @keyframes popSuccess {
+      0% { transform: scale(0.85); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .pop-success {
+      animation: popSuccess 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes shakeSlot {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+    .shake-slot {
+      animation: shakeSlot 0.4s ease-in-out;
+    }
+
+    /* Karaoke Synchronized Audio Glow */
+    .sync-active-audio {
+      box-shadow: 0 0 0 4px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.45) !important;
+      background-color: #fef3c7 !important;
+      transform: scale(1.02);
+      transition: all 0.2s ease;
+    }
+    .k-active-word {
+      background-color: #fef08a;
+      color: #854d0e;
+      border-radius: 6px;
+      padding: 0 3px;
+      box-shadow: 0 0 8px rgba(234, 179, 8, 0.6);
+    }
+
+    /* Speech Bubble Tail for Role-Play */
+    .bubble-tail-left {
+      position: relative;
+    }
+    .bubble-tail-left::after {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 10px 14px 10px 0;
+      border-style: solid;
+      border-color: transparent currentColor transparent transparent;
+    }
+
+    .bubble-tail-right {
+      position: relative;
+    }
+    .bubble-tail-right::after {
+      content: '';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 10px 0 10px 14px;
+      border-style: solid;
+      border-color: transparent transparent transparent currentColor;
+    }
+
+    @media print {
+      body { background: white !important; }
+      .no-print { display: none !important; }
+      .sheet-card { box-shadow: none !important; border-width: 2px !important; }
+    }
+  </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center">
+
+  <div class="w-full max-w-4xl flex flex-col items-center">
+
+    <!-- Top Navigation Ribbon (No-Print) -->
+    <div class="no-print w-full flex flex-wrap items-center justify-between gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-md border border-teal-200 mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-teal-500 text-white text-lg font-black shadow-xs">
+          8
+        </span>
+        <div>
+          <h1 class="text-sm sm:text-base font-black text-slate-800 leading-tight">Do you remember? • ورقة عمل تفاعلية ناطقة</h1>
+          <p class="text-[11px] text-teal-700 font-bold">سحب وإفلات • استجابة فورية بالصوت والصورة • نطق كندي 🇨🇦</p>
+        </div>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-2">
+        <!-- Canadian Voice Tester -->
+        <button onclick="canadianSpeaker.testVoice()" class="px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-800 text-xs font-black flex items-center gap-1.5 transition">
+          <span>🇨🇦</span>
+          <span>صوت كندي</span>
+        </button>
+
+        <!-- Toggle Arabic Translation Button -->
+        <button id="toggleTransBtn" onclick="toggleTranslations()" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 text-xs font-black flex items-center gap-1 transition">
+          <span>🌐</span>
+          <span id="transBtnText">إخفاء الترجمة</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button onclick="resetWorksheet()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-black flex items-center gap-1 transition">
+          <span>🔄</span>
+          <span>إعادة حل</span>
+        </button>
+
+        <!-- Score Badge -->
+        <div class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-black flex items-center gap-1 shadow-xs">
+          <span>النقاط:</span>
+          <span id="scoreDisplay">0 / 15</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Printable Sheet Body -->
+    <main class="sheet-card w-full p-4 sm:p-7 md:p-9 relative bg-white overflow-hidden">
+      
+      <!-- Top Decorative Icons matching Page 8 banner -->
+      <div class="absolute top-2 left-4 text-2xl select-none opacity-80">🚌 🎒</div>
+      <div class="absolute top-2 right-4 text-2xl select-none opacity-80">✏️ ⭐</div>
+
+      <!-- PAGE HEADER: "Do you remember?", MoE Logo & QR code -->
+      <header class="flex items-center justify-between gap-4 border-b-2 border-slate-100 pb-4 mb-6 flex-wrap sm:flex-nowrap">
+        
+        <!-- Left: Curved Ribbon "Do you remember?" -->
+        <div class="flex items-center gap-3">
+          <div class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-5 py-2.5 rounded-2xl shadow-md border-2 border-white flex items-center gap-2 transform -rotate-1 hover:rotate-0 transition">
+            <span class="text-xl">💭</span>
+            <span class="en-font font-black text-xl sm:text-2xl tracking-wide">Do you remember?</span>
+          </div>
+          <span class="text-xs sm:text-sm font-bold text-slate-500 hidden md:inline">هل تتذكر؟</span>
+        </div>
+
+        <!-- Center: Student Name & Date Inputs -->
+        <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap" dir="ltr">
+          <div class="flex items-center gap-1.5">
+            <span class="en-font font-bold text-slate-700 text-sm">Name:</span>
+            <input type="text" placeholder="Student name..." class="en-font w-32 sm:w-40 border-b-2 border-dotted border-slate-400 focus:border-teal-500 focus:outline-hidden px-1.5 py-0.5 text-sm font-bold text-teal-800 bg-transparent">
+          </div>
+        </div>
+
+        <!-- Right: Saudi Ministry of Education Logo & QR Code badge -->
+        <div class="flex items-center gap-3 shrink-0">
+          <!-- MoE Logo Text representation -->
+          <div class="flex flex-col items-center text-center">
+            <div class="flex items-center gap-0.5 text-teal-700 text-lg leading-none mb-0.5">
+              <span>📗</span><span>❖</span><span>📘</span>
+            </div>
+            <span class="text-[11px] font-black text-teal-800 leading-none">وزارة التعليم</span>
+            <span class="text-[8px] font-bold text-slate-400 leading-none mt-0.5">Ministry of Education</span>
+          </div>
+
+          <!-- QR Code Badge -->
+          <div class="w-11 h-11 border-2 border-slate-700 rounded-lg p-1 bg-white shadow-2xs flex flex-col items-center justify-center text-slate-800" title="رمز الاستجابة السريع">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm14 0h2v2h-2v-2zm-4 0h2v2h-2v-2zm4 4h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zM5 5h2v2H5V5zm12 0h2v2h-2V5zM5 17h2v2H5v-2z"/>
+            </svg>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- =========================================================================
+           EXERCISE 1: READ AND COMPLETE WITH HOW LONG OR HOW MANY
+           ========================================================================= -->
+      <section class="mb-10" id="sectionExercise1">
+        
+        <!-- Exercise Title Header (Centered) -->
+        <div class="flex flex-col items-center justify-center text-center mb-4 gap-1.5">
+          <div class="flex items-center justify-center gap-2 flex-wrap" dir="ltr">
+            <span class="w-7 h-7 rounded-full bg-teal-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+              1
+            </span>
+            <h2 class="en-font font-black text-lg sm:text-xl text-slate-800 flex items-center gap-2 flex-wrap justify-center">
+              <span>📖 Read and complete with</span>
+              <span class="text-teal-600 underline decoration-teal-400">How long</span>
+              <span>or</span>
+              <span class="text-indigo-600 underline decoration-indigo-400">How many</span>.
+            </h2>
+          </div>
+          <p class="text-xs sm:text-sm font-bold text-slate-500" dir="rtl">
+            اقرأ وأكمل باختيار أداة الاستفهام المناسبة (المدة الزمنية أم العدد)
+          </p>
+        </div>
+
+        <!-- Main Exercise Card framed by the Two Girls from image_b264bb.jpg -->
+        <div class="relative bg-gradient-to-r from-purple-50/60 via-white to-pink-50/60 border-3 border-purple-300 rounded-3xl p-3 sm:p-5 shadow-xs">
+          
+          <!-- Left Girl Avatar (Excited with hands on cheeks) -->
+          <div class="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 flex-col items-center">
+            <div class="w-16 h-16 rounded-2xl bg-pink-100 border-2 border-pink-400 shadow-md flex items-center justify-center text-3xl transform -rotate-6 hover:scale-105 transition">
+              👧🏻
+            </div>
+            <span class="text-[10px] font-bold text-pink-700 mt-1 bg-white px-1.5 py-0.5 rounded-full shadow-2xs">Lina</span>
+          </div>
+
+          <!-- Right Girl Avatar (Smart girl with glasses) -->
+          <div class="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 flex-col items-center">
+            <div class="w-16 h-16 rounded-2xl bg-teal-100 border-2 border-teal-400 shadow-md flex items-center justify-center text-3xl transform rotate-6 hover:scale-105 transition">
+              🧒🏽👓
+            </div>
+            <span class="text-[10px] font-bold text-teal-700 mt-1 bg-white px-1.5 py-0.5 rounded-full shadow-2xs">Maha</span>
+          </div>
+
+          <!-- Exercise 1 Word Bank (Drag & Drop Pills) -->
+          <div class="mb-5 bg-white rounded-2xl p-3 border-2 border-dashed border-purple-200 shadow-inner flex flex-col items-center">
+            <div class="text-xs font-bold text-purple-900 mb-2 flex items-center gap-1.5">
+              <span>💡</span>
+              <span>اسحب أداة الاستفهام المناسبة أو انقر عليها ثم انقر في الفراغ:</span>
+            </div>
+
+            <div class="flex items-center justify-center gap-3 sm:gap-6 flex-wrap" dir="ltr">
+              <!-- Pill: How long -->
+              <div id="pill-how-long" draggable="true" ondragstart="handleDragStart(event, 'How long')" onclick="selectWordPill('How long', this)" class="word-pill px-5 py-2 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black en-font text-base sm:text-lg shadow-md border-2 border-white flex items-center gap-2">
+                <span>⏱️ How long</span>
+                <span class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full">كم المدة</span>
+              </div>
+
+              <!-- Pill: How many -->
+              <div id="pill-how-many" draggable="true" ondragstart="handleDragStart(event, 'How many')" onclick="selectWordPill('How many', this)" class="word-pill px-5 py-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black en-font text-base sm:text-lg shadow-md border-2 border-white flex items-center gap-2">
+                <span>🔢 How many</span>
+                <span class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full">كم العدد</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 Questions List matching page 8 -->
+          <div class="flex flex-col gap-3 px-1 sm:px-6" id="ex1QuestionsList" dir="ltr">
+            <!-- Rendered dynamically via JavaScript -->
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =========================================================================
+           EXERCISE 2: WRITE MORE QUESTIONS + TWO-CHARACTER ROLE PLAY
+           ========================================================================= -->
+      <section class="mb-10 pt-6 border-t-3 border-dashed border-teal-200" id="sectionExercise2">
+        
+        <!-- Exercise 2 Title Header (Centered) -->
+        <div class="flex flex-col items-center justify-center text-center mb-5 gap-1.5">
+          <div class="flex items-center justify-center gap-2 flex-wrap" dir="ltr">
+            <span class="w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+              2
+            </span>
+            <h2 class="en-font font-black text-lg sm:text-xl text-slate-800 flex items-center gap-2 flex-wrap justify-center">
+              <span>✏️ Write more questions. Then ask and answer.</span>
+            </h2>
+          </div>
+          <p class="text-xs sm:text-sm font-bold text-slate-500" dir="rtl">
+            تمرين الكتابة • ثم لعبة تبادل الأدوار بين الصديقين 👦🏻👦🏽
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          <!-- LEFT COLUMN (Notebook Writing Exercise): 7 Cols -->
+          <div class="lg:col-span-7 flex flex-col">
+            
+            <div class="border-2 border-slate-300 rounded-3xl bg-amber-50/40 p-3 sm:p-4 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs sm:text-sm font-black text-slate-700 flex items-center gap-1.5">
+                  <span>📓</span>
+                  <span>دفتر كتابة الأسئلة (اكتب سؤالك بنفسك):</span>
+                </span>
+                <button onclick="insertSampleQuestion()" class="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 border border-teal-300 px-2 py-0.5 rounded-lg transition">
+                  ✨ نموذج جاهز
+                </button>
+              </div>
+
+              <!-- Skeuomorphic Spiral Notebook -->
+              <div class="border-2 border-slate-300 rounded-2xl bg-white overflow-hidden shadow-md">
+                
+                <!-- Spiral Rings Header -->
+                <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                    <span class="spiral-ring"></span>
+                  </div>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest en-font">My Notebook</span>
+                </div>
+
+                <!-- Lined Text Area -->
+                <div class="p-3 sm:p-4 spiral-notebook min-h-[170px]" dir="ltr">
+                  <textarea id="notebookInput" rows="5" placeholder="Write your question here... (e.g. How many hours do you sleep?)" class="handwriting-font w-full bg-transparent resize-none focus:outline-hidden text-lg sm:text-xl font-bold text-sky-900 placeholder:text-slate-400 placeholder:font-normal leading-[33px]"></textarea>
+                </div>
+
+                <!-- Notebook Action Bar -->
+                <div class="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between flex-wrap gap-2">
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="readNotebookWriting()" class="px-3 py-1 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1 shadow-2xs transition active:scale-95">
+                      <span>🔊</span>
+                      <span>استمع لما كتبت</span>
+                    </button>
+                    <button onclick="clearNotebookWriting()" class="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition">
+                      مسح
+                    </button>
+                  </div>
+                  <button onclick="checkNotebookWriting()" class="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-2xs transition active:scale-95">
+                    <span>✅</span>
+                    <span>فحص السؤال</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Helper Question Starters -->
+              <div class="mt-2.5 flex items-center gap-1.5 flex-wrap" dir="ltr">
+                <span class="text-[11px] font-bold text-slate-500">Add start:</span>
+                <button onclick="appendNotebookStarter('How many ')" class="text-xs font-bold bg-white hover:bg-sky-50 border border-sky-300 text-sky-800 px-2 py-0.5 rounded-lg transition">+ How many</button>
+                <button onclick="appendNotebookStarter('How long ')" class="text-xs font-bold bg-white hover:bg-teal-50 border border-teal-300 text-teal-800 px-2 py-0.5 rounded-lg transition">+ How long</button>
+                <button onclick="appendNotebookStarter('do you have on ')" class="text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-2 py-0.5 rounded-lg transition">+ do you have on...</button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN (Two-Character Role-Play Game): 5 Cols -->
+          <div class="lg:col-span-5 flex flex-col">
+            
+            <div class="border-2 border-emerald-300 rounded-3xl bg-emerald-50/50 p-3 sm:p-4 shadow-sm flex flex-col">
+              
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs sm:text-sm font-black text-emerald-950 flex items-center gap-1.5">
+                  <span>🎭</span>
+                  <span>لعبة لعب الأدوار (سؤال وجواب):</span>
+                </span>
+                <button onclick="playRolePlayDialogue()" id="rolePlayAllBtn" class="text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1 transition active:scale-95">
+                  <span>▶️</span>
+                  <span>تشغيل المحادثة</span>
+                </button>
+              </div>
+
+              <!-- Dialogue Bubbles between Boy 1 and Boy 2 -->
+              <div class="flex flex-col gap-3" dir="ltr">
+                
+                <!-- Turn 1: Boy 1 Asks (Green Bubble) -->
+                <div class="flex items-start gap-2.5 group">
+                  <div class="w-12 h-12 rounded-2xl bg-green-100 border-2 border-green-500 flex items-center justify-center text-2xl shadow-xs shrink-0 transform group-hover:scale-105 transition">
+                    👦🏻
+                  </div>
+                  <div onclick="speakBoyLine(1)" id="roleBubble1" class="cursor-pointer flex-1 bg-green-100 border-2 border-green-500 text-green-950 p-2.5 rounded-2xl shadow-xs hover:bg-green-200 transition">
+                    <p class="en-font font-black text-xs sm:text-sm">"How many classes do you have on Wednesdays?"</p>
+                    <p class="text-[11px] font-bold text-green-800 mt-1 arabic-sub" dir="rtl">كم حصة لديك في يوم الأربعاء؟</p>
+                  </div>
+                </div>
+
+                <!-- Turn 2: Boy 2 Answers (Salmon / Orange Bubble) -->
+                <div class="flex items-start gap-2.5 flex-row-reverse group">
+                  <div class="w-12 h-12 rounded-2xl bg-rose-100 border-2 border-rose-400 flex items-center justify-center text-2xl shadow-xs shrink-0 transform group-hover:scale-105 transition">
+                    👦🏽👓
+                  </div>
+                  <div onclick="speakBoyLine(2)" id="roleBubble2" class="cursor-pointer flex-1 bg-rose-100 border-2 border-rose-400 text-rose-950 p-2.5 rounded-2xl shadow-xs hover:bg-rose-200 transition text-right">
+                    <p class="en-font font-black text-xs sm:text-sm">"This year, I have five classes on Wednesdays!"</p>
+                    <p class="text-[11px] font-bold text-rose-800 mt-1 arabic-sub" dir="rtl">هذا العام، لدي خمس حصص في أيام الأربعاء!</p>
+                  </div>
+                </div>
+
+                <!-- Turn 3: Boy 2 Asks Next Question (Pink Bubble) -->
+                <div class="flex items-start gap-2.5 flex-row-reverse group">
+                  <div class="w-12 h-12 rounded-2xl bg-pink-100 border-2 border-pink-400 flex items-center justify-center text-2xl shadow-xs shrink-0 transform group-hover:scale-105 transition">
+                    👦🏽👓
+                  </div>
+                  <div onclick="speakBoyLine(3)" id="roleBubble3" class="cursor-pointer flex-1 bg-pink-100 border-2 border-pink-400 text-pink-950 p-2.5 rounded-2xl shadow-xs hover:bg-pink-200 transition text-right">
+                    <p class="en-font font-black text-xs sm:text-sm">"How long is the English lesson?"</p>
+                    <p class="text-[11px] font-bold text-pink-800 mt-1 arabic-sub" dir="rtl">كم مدة درس اللغة الإنجليزية؟</p>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =========================================================================
+           EXERCISE 3: LOOK, READ, AND COMPLETE (TANG'S STORY IN PAST SIMPLE)
+           ========================================================================= -->
+      <section class="mt-8 pt-6 border-t-3 border-dashed border-teal-200" id="sectionExercise3">
+        
+        <!-- Exercise 3 Title Header (Centered) -->
+        <div class="flex flex-col items-center justify-center text-center mb-5 gap-2">
+          <div class="flex items-center justify-center gap-2 flex-wrap" dir="ltr">
+            <span class="w-7 h-7 rounded-full bg-rose-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+              3
+            </span>
+            <h2 class="en-font font-black text-lg sm:text-xl text-slate-800 flex items-center gap-2 flex-wrap justify-center">
+              <span>📷 Look, read, and complete.</span>
+            </h2>
+          </div>
+          <div class="flex items-center justify-center gap-3 flex-wrap">
+            <span class="text-xs sm:text-sm font-bold text-slate-500" dir="rtl">أكمل بتصريف الأفعال في زمن الماضي</span>
+            <button onclick="readEntireTangStory()" id="readTangStoryBtn" class="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition active:scale-95">
+              <span>🔊</span>
+              <span>استمع للقصة كاملة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Word Bank for Past Simple Verbs (Draggable Pills) -->
+        <div class="mb-5 bg-amber-50/70 border-2 border-amber-300 rounded-3xl p-3 sm:p-4 shadow-inner">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs sm:text-sm font-black text-amber-950 flex items-center gap-1.5">
+              <span>🔤</span>
+              <span>صندوق أفعال الماضي (اسحب أو انقر لتعبئة الفراغ المناسب):</span>
+            </span>
+            <span class="text-[11px] font-bold text-amber-700 bg-white px-2 py-0.5 rounded-full border border-amber-200">
+              Past Simple
+            </span>
+          </div>
+
+          <div id="tangVerbsWordBank" class="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- 3 Story Cartoon Panels matching page 8 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" dir="ltr">
+          
+          <!-- Panel 1: Breakfast at 8 a.m. -->
+          <div class="flex flex-col bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 shadow-xs hover:border-sky-300 transition">
+            <!-- Cartoon Illustration 1 -->
+            <div class="h-36 sm:h-40 rounded-xl bg-gradient-to-b from-sky-100 to-amber-50 border border-slate-200 p-2 flex flex-col items-center justify-center relative overflow-hidden mb-3">
+              <div class="text-5xl transform hover:scale-110 transition cursor-pointer" title="Tang eating pancakes">
+                🥞🧃
+              </div>
+              <div class="w-14 h-14 bg-red-500 rounded-xl border-2 border-red-700 shadow-md flex items-center justify-center text-white font-black text-xl mt-1">
+                👀
+              </div>
+              <span class="absolute bottom-1 right-2 text-[10px] font-bold text-slate-500 bg-white/80 px-1.5 py-0.5 rounded-md">8:00 a.m.</span>
+            </div>
+
+            <!-- Panel 1 Text -->
+            <div class="en-font text-xs sm:text-sm text-slate-800 leading-relaxed flex flex-col gap-1.5">
+              <p>
+                Tang <span class="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded-md">¹ woke up</span> (wake up) on Sunday at 8 a.m.
+              </p>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>He ²</span>
+                <span id="tang-slot-2"></span>
+                <span>(eat) pancakes with eggs for breakfast</span>
+              </div>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>and ³</span>
+                <span id="tang-slot-3"></span>
+                <span>(drink) orange juice.</span>
+              </div>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-2 border-t pt-1.5 arabic-sub" dir="rtl">
+              استيقظ تانغ في الثامنة صباحاً، وأكل الفطائر مع البيض وشرب عصير البرتقال.
+            </p>
+          </div>
+
+          <!-- Panel 2: Walking with Cha-Cha in the park -->
+          <div class="flex flex-col bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 shadow-xs hover:border-sky-300 transition">
+            <!-- Cartoon Illustration 2 -->
+            <div class="h-36 sm:h-40 rounded-xl bg-gradient-to-b from-emerald-100 to-sky-50 border border-slate-200 p-2 flex items-center justify-center gap-2 relative overflow-hidden mb-3">
+              <!-- Tang -->
+              <div class="w-12 h-12 bg-red-500 rounded-xl border-2 border-red-700 shadow-md flex items-center justify-center text-white font-black text-lg">
+                👀
+              </div>
+              <!-- Cha-Cha -->
+              <div class="w-10 h-10 bg-purple-500 rounded-xl border-2 border-purple-700 shadow-md flex items-center justify-center text-white font-black text-sm">
+                🟣
+              </div>
+              <!-- Butterfly -->
+              <span class="text-2xl absolute top-3 right-4 animate-bounce">🦋</span>
+              <span class="absolute bottom-1 right-2 text-[10px] font-bold text-slate-500 bg-white/80 px-1.5 py-0.5 rounded-md">In the Park</span>
+            </div>
+
+            <!-- Panel 2 Text -->
+            <div class="en-font text-xs sm:text-sm text-slate-800 leading-relaxed flex flex-col gap-1.5">
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>He ⁴</span>
+                <span id="tang-slot-4"></span>
+                <span>(go) for a walk with Cha-Cha in the park.</span>
+              </div>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>They ⁵</span>
+                <span id="tang-slot-5"></span>
+                <span>(see) a butterfly and ⁶</span>
+                <span id="tang-slot-6"></span>
+                <span>Hob and Bud.</span>
+              </div>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-2 border-t pt-1.5 arabic-sub" dir="rtl">
+              ذهب للتنزه مع تشا-تشا في الحديقة، وشاهدا فراشة وقابلا هوب وبَد.
+            </p>
+          </div>
+
+          <!-- Panel 3: Reading at home on the sofa -->
+          <div class="flex flex-col bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 shadow-xs hover:border-sky-300 transition">
+            <!-- Cartoon Illustration 3 -->
+            <div class="h-36 sm:h-40 rounded-xl bg-gradient-to-b from-indigo-100 to-pink-50 border border-slate-200 p-2 flex flex-col items-center justify-center relative overflow-hidden mb-3">
+              <div class="text-4xl mb-1">🛋️📖</div>
+              <!-- Tang reading -->
+              <div class="w-12 h-12 bg-red-500 rounded-xl border-2 border-red-700 shadow-md flex items-center justify-center text-white font-black text-lg">
+                📚
+              </div>
+              <span class="absolute bottom-1 right-2 text-[10px] font-bold text-slate-500 bg-white/80 px-1.5 py-0.5 rounded-md">8:00 p.m.</span>
+            </div>
+
+            <!-- Panel 3 Text -->
+            <div class="en-font text-xs sm:text-sm text-slate-800 leading-relaxed flex flex-col gap-1.5">
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>Later, he ⁷</span>
+                <span id="tang-slot-7"></span>
+                <span>(relax) at home.</span>
+              </div>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>He ⁸</span>
+                <span id="tang-slot-8"></span>
+                <span>(read) his favorite book and then ⁹</span>
+                <span id="tang-slot-9"></span>
+                <span>(go) to bed.</span>
+              </div>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span>He ¹⁰</span>
+                <span id="tang-slot-10"></span>
+                <span>(fall) asleep at 8 p.m.</span>
+              </div>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500 mt-2 border-t pt-1.5 arabic-sub" dir="rtl">
+              استرخى في المنزل وقرأ كتابه المفضل ثم ذهب للنوم ونام عند الثامنة مساءً.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- PAGE FOOTER: Classroom pupils, Page 8 badge, W circle icon -->
+      <footer class="mt-10 pt-4 border-t-2 border-slate-100 flex items-center justify-between relative px-2 sm:px-6">
+        
+        <!-- Left Pupil studying -->
+        <div class="flex items-center gap-2 text-slate-600">
+          <div class="text-3xl sm:text-4xl animate-bounce" style="animation-duration: 2.8s;">👦🏻📚</div>
+          <div class="hidden sm:block text-[11px] font-bold text-slate-500" dir="rtl">
+            <span class="text-teal-700 font-extrabold">منهج اللغة الإنجليزية</span><br>
+            الصف السادس / الخامس
+          </div>
+        </div>
+
+        <!-- Center Page Number 8 Badge -->
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full border-4 border-teal-500 bg-white flex items-center justify-center shadow-md transform hover:scale-110 transition">
+            <span class="en-font font-black text-2xl text-slate-800">8</span>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400 mt-0.5">الصفحة</span>
+        </div>
+
+        <!-- Right: Purple "W" badge from image_b264bb.jpg -->
+        <div class="flex items-center gap-2">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-800 to-indigo-600 text-white font-black en-font text-2xl flex items-center justify-center shadow-lg border-2 border-white transform hover:rotate-12 transition">
+            W
+          </div>
+        </div>
+
+      </footer>
+
+    </main>
+
+    <!-- Bottom Action Ribbon -->
+    <div class="no-print w-full mt-4 flex items-center justify-center gap-3">
+      <button onclick="window.print()" class="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-300 text-slate-700 font-bold text-sm shadow-sm flex items-center gap-2 transition">
+        <span>🖨️</span>
+        <span>طباعة ورقة العمل</span>
+      </button>
+      <button onclick="checkAllWorksheetAnswers()" class="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md flex items-center gap-2 transition active:scale-95">
+        <span>✅</span>
+        <span>التحقق من جميع الإجابات</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Instant Feedback Modal Toast -->
+  <div id="toastNotification" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform translate-y-28 opacity-0">
+    <div class="bg-slate-900 text-white px-6 py-3.5 rounded-2xl shadow-2xl border-2 border-teal-400 flex items-center gap-3 backdrop-blur-md">
+      <span id="toastIcon" class="text-2xl">✨</span>
+      <div>
+        <p id="toastTitle" class="text-base font-black text-white"></p>
+        <p id="toastMsg" class="text-xs text-slate-200 font-medium"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* =========================================================================
+       1. WEB AUDIO SYNTHESIZER (INSTANT CHIMES)
+       ========================================================================= */
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playSuccess() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.2, now + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.3);
+        });
+      }
+      playError() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [280, 220];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.15, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.22);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.24);
+        });
+      }
+      playPop() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.06);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+    const sfx = new SoundFX();
+
+    /* =========================================================================
+       2. CANADIAN SPEAKER & ARABIC FEEDBACK SYNTHESIZER
+       ========================================================================= */
+    class CanadianSpeaker {
+      constructor() {
+        this.synth = window.speechSynthesis;
+        this.voice = null;
+        this.initVoice();
+        if (this.synth && this.synth.onvoiceschanged !== undefined) {
+          this.synth.onvoiceschanged = () => this.initVoice();
+        }
+      }
+      initVoice() {
+        if (!this.synth) return;
+        const voices = this.synth.getVoices();
+        // Priority: Canadian English -> US / UK Natural Female -> English
+        this.voice = voices.find(v => v.lang === 'en-CA' || v.lang.includes('CA') || (v.lang.startsWith('en') && v.name.toLowerCase().includes('canada')))
+          || voices.find(v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('zira')))
+          || voices.find(v => v.lang.startsWith('en'))
+          || null;
+      }
+      speak(text, onEndCallback = null) {
+        if (!this.synth) { if (onEndCallback) onEndCallback(); return; }
+        this.synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        if (this.voice) utter.voice = this.voice;
+        utter.lang = 'en-CA';
+        utter.rate = 0.85; // Calm, clear classroom cadence
+        utter.pitch = 1.05;
+        utter.volume = 1.0;
+        if (onEndCallback) {
+          utter.onend = () => onEndCallback();
+          utter.onerror = () => onEndCallback();
+        }
+        this.synth.speak(utter);
+      }
+      testVoice() {
+        sfx.playPop();
+        this.speak("Hello everyone! Welcome to page eight. Let's practice How long and How many!");
+        showFeedbackToast(true, "تم تفعيل الصوت الكندي الإنجليزي بنقاء ووضوح 🇨🇦");
+      }
+    }
+    const canadianSpeaker = new CanadianSpeaker();
+
+    // Arabic instant vocal feedback: "الإجابة صحيحة" / "إجابة خاطئة"
+    function speakArabicFeedback(isCorrect, callback = null) {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const phrase = isCorrect ? "الإجابة صحيحة" : "إجابة خاطئة";
+          const utter = new SpeechSynthesisUtterance(phrase);
+          utter.lang = 'ar-SA';
+          utter.rate = 0.95;
+          utter.pitch = 1.05;
+          utter.volume = 1.0;
+          const voices = window.speechSynthesis.getVoices();
+          const arVoice = voices.find(v => v.lang && (v.lang.startsWith('ar') || v.lang.includes('AR')));
+          if (arVoice) utter.voice = arVoice;
+          if (callback) {
+            utter.onend = () => callback();
+            utter.onerror = () => callback();
+          }
+          window.speechSynthesis.speak(utter);
+        } else if (callback) {
+          callback();
+        }
+      } catch (err) {
+        if (callback) callback();
+      }
+    }
+
+    // Modal Toast for Feedback
+    function showFeedbackToast(isCorrect, message) {
+      const toast = document.getElementById('toastNotification');
+      if (!toast) return;
+      const inner = toast.querySelector('div');
+      const title = document.getElementById('toastTitle');
+      const msg = document.getElementById('toastMsg');
+      const icon = document.getElementById('toastIcon');
+
+      if (isCorrect) {
+        inner.className = "bg-emerald-600 text-white px-6 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-300 flex items-center gap-3 backdrop-blur-md transform scale-105 transition duration-200";
+        icon.textContent = "✅";
+        title.textContent = "الإجابة صحيحة";
+        msg.textContent = message || "أحسنت! إجابة ممتازة ودقيقة.";
+      } else {
+        inner.className = "bg-rose-600 text-white px-6 py-3.5 rounded-2xl shadow-2xl border-2 border-rose-300 flex items-center gap-3 backdrop-blur-md transform scale-105 transition duration-200";
+        icon.textContent = "❌";
+        title.textContent = "إجابة خاطئة";
+        msg.textContent = message || "حاول مرة أخرى!";
+      }
+
+      toast.classList.remove('translate-y-28', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-28', 'opacity-0');
+      }, 2500);
+    }
+
+    /* =========================================================================
+       3. EXERCISE 1 DATA & LOGIC (HOW LONG vs HOW MANY)
+       ========================================================================= */
+    const EX1_QUESTIONS = [
+      {
+        id: 1,
+        correct: "How many",
+        restOfSentence: "classes do you have on Wednesdays?",
+        fullEnglish: "How many classes do you have on Wednesdays?",
+        arabic: "كم عدد الحصص الدراسية لديك في يوم الأربعاء؟"
+      },
+      {
+        id: 2,
+        correct: "How long",
+        restOfSentence: "is the lunch break?",
+        fullEnglish: "How long is the lunch break?",
+        arabic: "كم تبلغ مدة استراحة الغداء؟"
+      },
+      {
+        id: 3,
+        correct: "How many",
+        restOfSentence: "teachers do you have this year?",
+        fullEnglish: "How many teachers do you have this year?",
+        arabic: "كم عدد المعلمين لديك هذا العام؟"
+      },
+      {
+        id: 4,
+        correct: "How many",
+        restOfSentence: "students are in your class?",
+        fullEnglish: "How many students are in your class?",
+        arabic: "كم عدد الطلاب في فصلك الدراسي؟"
+      },
+      {
+        id: 5,
+        correct: "How long",
+        restOfSentence: "is your journey to school?",
+        fullEnglish: "How long is your journey to school?",
+        arabic: "كم تستغرق رحلتك للوصول إلى المدرسة؟"
+      },
+      {
+        id: 6,
+        correct: "How long",
+        restOfSentence: "was your vacation?",
+        fullEnglish: "How long was your vacation?",
+        arabic: "كم كانت مدة إجازتك؟"
+      }
+    ];
+
+    const ex1SlotsState = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null };
+    let selectedEx1Word = null;
+
+    function renderEx1Questions() {
+      const listEl = document.getElementById('ex1QuestionsList');
+      listEl.innerHTML = '';
+
+      EX1_QUESTIONS.forEach(q => {
+        const row = document.createElement('div');
+        row.id = `ex1-row-${q.id}`;
+        row.className = "flex flex-col p-2.5 sm:p-3 rounded-2xl bg-white border-2 border-slate-200 hover:border-purple-300 transition shadow-xs";
+
+        const val = ex1SlotsState[q.id];
+        let slotHtml = '';
+
+        if (val) {
+          const isCorrect = (val === q.correct);
+          if (isCorrect) {
+            row.classList.add('border-emerald-500', 'bg-emerald-50/40');
+            slotHtml = `
+              <div onclick="clearEx1Slot(${q.id})" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 border-2 border-emerald-500 rounded-xl font-black en-font text-sm sm:text-base text-emerald-950 shadow-2xs cursor-pointer hover:bg-rose-100 transition" title="انقر للتغيير">
+                <span>${val}</span>
+                <span class="text-xs bg-emerald-600 text-white font-bold px-1.5 py-0.2 rounded-md">✓ صحيح</span>
+              </div>
+            `;
+          } else {
+            row.classList.add('border-rose-400', 'bg-rose-50/40');
+            slotHtml = `
+              <div onclick="clearEx1Slot(${q.id})" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 border-2 border-rose-400 rounded-xl font-black en-font text-sm sm:text-base text-rose-950 shadow-2xs cursor-pointer hover:bg-rose-200 transition" title="انقر للإزالة">
+                <span class="line-through decoration-rose-600">${val}</span>
+                <span class="text-xs bg-rose-600 text-white font-bold px-1.5 py-0.2 rounded-md">✗ غير صحيح</span>
+              </div>
+            `;
+          }
+        } else {
+          slotHtml = `
+            <div onclick="handleEx1SlotClick(${q.id})" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="handleEx1Drop(event, ${q.id})" class="drop-slot inline-flex items-center justify-center px-4 py-1 bg-slate-50 border-2 border-dashed border-slate-400 rounded-xl text-slate-400 text-xs sm:text-sm font-bold min-w-[130px] cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition">
+              ...........................
+            </div>
+          `;
+        }
+
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
+              <!-- Question Number -->
+              <span class="w-7 h-7 rounded-full bg-slate-800 text-white font-black text-xs sm:text-sm flex items-center justify-center shrink-0">
+                ${q.id}.
+              </span>
+              <!-- Slot -->
+              ${slotHtml}
+              <!-- Rest of sentence -->
+              <span class="en-font font-bold text-slate-800 text-sm sm:text-base">
+                ${q.restOfSentence}
+              </span>
+            </div>
+
+            <!-- Audio Pronounce Button -->
+            <button onclick="playEx1QuestionAudio(${q.id})" class="w-8 h-8 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center text-sm transition shrink-0" title="استمع للسؤال كاملاً">
+              🔊
+            </button>
+          </div>
+
+          <!-- Arabic Translation Subtitle -->
+          <div class="mt-1.5 pt-1 border-t border-slate-100 text-[11px] font-bold text-slate-500 arabic-sub" dir="rtl">
+            الترجمة: ${q.arabic}
+          </div>
+        `;
+
+        listEl.appendChild(row);
+      });
+    }
+
+    function selectWordPill(word, el) {
+      if (selectedEx1Word === word) {
+        selectedEx1Word = null;
+        el.classList.remove('selected-pill');
+      } else {
+        document.querySelectorAll('#sectionExercise1 .word-pill').forEach(p => p.classList.remove('selected-pill'));
+        selectedEx1Word = word;
+        el.classList.add('selected-pill');
+        showFeedbackToast(true, `تم اختيار (${word}). انقر الآن على الفراغ المطلوب لوضعه`);
+      }
+    }
+
+    function handleDragStart(e, word) {
+      e.dataTransfer.setData("text/plain", word);
+      selectedEx1Word = word;
+      sfx.playPop();
+    }
+
+    function handleEx1Drop(e, qId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const droppedWord = e.dataTransfer.getData("text/plain") || selectedEx1Word;
+      if (droppedWord) {
+        placeEx1Word(qId, droppedWord);
+      }
+    }
+
+    function handleEx1SlotClick(qId) {
+      if (selectedEx1Word) {
+        placeEx1Word(qId, selectedEx1Word);
+      } else {
+        sfx.playPop();
+        showFeedbackToast(false, "اختر أولاً (How long) أو (How many) من الصندوق في الأعلى");
+      }
+    }
+
+    function clearEx1Slot(qId) {
+      sfx.playPop();
+      ex1SlotsState[qId] = null;
+      renderEx1Questions();
+      updateScoreBadge();
+    }
+
+    // Place word and evaluate
+    function placeEx1Word(qId, word) {
+      const q = EX1_QUESTIONS.find(item => item.id === qId);
+      const isCorrect = (word === q.correct);
+
+      ex1SlotsState[qId] = word;
+      renderEx1Questions();
+      updateScoreBadge();
+
+      const rowEl = document.getElementById(`ex1-row-${qId}`);
+
+      if (isCorrect) {
+        sfx.playSuccess();
+        speakArabicFeedback(true, () => {
+          canadianSpeaker.speak(`${word} ${q.restOfSentence}`);
+        });
+        if (rowEl) {
+          rowEl.classList.remove('shake-slot');
+          rowEl.classList.add('pop-success');
+        }
+        showFeedbackToast(true, `صحيح! نستخدم (${word}) مع هذا السؤال`);
+        fireConfetti(0.3);
+      } else {
+        sfx.playError();
+        speakArabicFeedback(false);
+        if (rowEl) {
+          rowEl.classList.remove('pop-success');
+          rowEl.classList.add('shake-slot');
+        }
+        showFeedbackToast(false, `إجابة خاطئة! (${word}) غير مناسبة هنا. انقر على الفراغ للإزالة`);
+      }
+    }
+
+    function playEx1QuestionAudio(qId) {
+      const q = EX1_QUESTIONS.find(item => item.id === qId);
+      const val = ex1SlotsState[qId];
+      const textToSpeak = val ? `${val} ${q.restOfSentence}` : q.fullEnglish;
+
+      const rowEl = document.getElementById(`ex1-row-${qId}`);
+      if (rowEl) rowEl.classList.add('sync-active-audio');
+
+      canadianSpeaker.speak(textToSpeak, () => {
+        if (rowEl) rowEl.classList.remove('sync-active-audio');
+      });
+    }
+
+    /* =========================================================================
+       4. EXERCISE 2: NOTEBOOK WRITING & ROLE-PLAY GAME
+       ========================================================================= */
+    function insertSampleQuestion() {
+      sfx.playPop();
+      const samples = [
+        "How many hours do you sleep every night?",
+        "How long does it take to do your homework?",
+        "How many English books do you read in a month?",
+        "How long is your summer holiday?"
+      ];
+      const rand = samples[Math.floor(Math.random() * samples.length)];
+      document.getElementById('notebookInput').value = rand;
+      showFeedbackToast(true, "تم إدراج نموذج سؤال في دفترك!");
+    }
+
+    function appendNotebookStarter(starter) {
+      sfx.playPop();
+      const input = document.getElementById('notebookInput');
+      input.value = (input.value.trim() ? input.value + " " : "") + starter;
+      input.focus();
+    }
+
+    function clearNotebookWriting() {
+      sfx.playPop();
+      document.getElementById('notebookInput').value = '';
+    }
+
+    function readNotebookWriting() {
+      const text = document.getElementById('notebookInput').value.trim();
+      if (!text) {
+        showFeedbackToast(false, "اكتب سؤالاً في الدفتر أولاً للاستماع إليه!");
+        return;
+      }
+      canadianSpeaker.speak(text);
+    }
+
+    function checkNotebookWriting() {
+      const text = document.getElementById('notebookInput').value.trim().toLowerCase();
+      if (!text) {
+        showFeedbackToast(false, "دفترك فارغ! اكتب سؤالك باستخدام How long أو How many");
+        return;
+      }
+
+      if (text.startsWith("how long") || text.startsWith("how many")) {
+        sfx.playSuccess();
+        speakArabicFeedback(true, () => {
+          canadianSpeaker.speak(document.getElementById('notebookInput').value);
+        });
+        showFeedbackToast(true, "ما شاء الله! سؤالك ممتاز وصحيح لغوياً يبدأ بأداة استفهام صحيحة 🌟");
+        fireConfetti(0.4);
+      } else {
+        sfx.playError();
+        speakArabicFeedback(false);
+        showFeedbackToast(false, "احرص على أن يبدأ سؤالك بـ (How many) للعدد أو (How long) للمدة الزمنية");
+      }
+    }
+
+    // Role-Play Game Logic (Boy 1 & Boy 2)
+    const ROLE_PLAY_LINES = [
+      { id: 1, speaker: "Boy 1", bubbleId: "roleBubble1", text: "How many classes do you have on Wednesdays?" },
+      { id: 2, speaker: "Boy 2", bubbleId: "roleBubble2", text: "This year, I have five classes on Wednesdays!" },
+      { id: 3, speaker: "Boy 2", bubbleId: "roleBubble3", text: "How long is the English lesson?" }
+    ];
+
+    function speakBoyLine(lineId) {
+      sfx.playPop();
+      const item = ROLE_PLAY_LINES.find(l => l.id === lineId);
+      const bubble = document.getElementById(item.bubbleId);
+
+      document.querySelectorAll('#sectionExercise2 .sync-active-audio').forEach(b => b.classList.remove('sync-active-audio'));
+      if (bubble) bubble.classList.add('sync-active-audio');
+
+      canadianSpeaker.speak(item.text, () => {
+        if (bubble) bubble.classList.remove('sync-active-audio');
+      });
+    }
+
+    function playRolePlayDialogue() {
+      sfx.playPop();
+      let currentIdx = 0;
+      const btn = document.getElementById('rolePlayAllBtn');
+      btn.innerHTML = `<span>⏹️</span><span>جارٍ التشغيل...</span>`;
+
+      function playNext() {
+        if (currentIdx >= ROLE_PLAY_LINES.length) {
+          btn.innerHTML = `<span>▶️</span><span>تشغيل المحادثة</span>`;
+          document.querySelectorAll('#sectionExercise2 .sync-active-audio').forEach(b => b.classList.remove('sync-active-audio'));
+          return;
+        }
+
+        const item = ROLE_PLAY_LINES[currentIdx];
+        const bubble = document.getElementById(item.bubbleId);
+        document.querySelectorAll('#sectionExercise2 .sync-active-audio').forEach(b => b.classList.remove('sync-active-audio'));
+        if (bubble) bubble.classList.add('sync-active-audio');
+
+        canadianSpeaker.speak(item.text, () => {
+          currentIdx++;
+          setTimeout(playNext, 600);
+        });
+      }
+
+      playNext();
+    }
+
+    /* =========================================================================
+       5. EXERCISE 3: LOOK, READ, AND COMPLETE (TANG'S PAST SIMPLE STORY)
+       ========================================================================= */
+    const TANG_VERBS = [
+      { id: 2, base: "eat", past: "ate", bg: "bg-red-100", border: "border-red-400", text: "text-red-950" },
+      { id: 3, base: "drink", past: "drank", bg: "bg-orange-100", border: "border-orange-400", text: "text-orange-950" },
+      { id: 4, base: "go", past: "went", bg: "bg-amber-100", border: "border-amber-400", text: "text-amber-950" },
+      { id: 5, base: "see", past: "saw", bg: "bg-emerald-100", border: "border-emerald-400", text: "text-emerald-950" },
+      { id: 6, base: "meet", past: "met", bg: "bg-teal-100", border: "border-teal-400", text: "text-teal-950" },
+      { id: 7, base: "relax", past: "relaxed", bg: "bg-sky-100", border: "border-sky-400", text: "text-sky-950" },
+      { id: 8, base: "read", past: "read", bg: "bg-indigo-100", border: "border-indigo-400", text: "text-indigo-950" },
+      { id: 9, base: "go", past: "went", bg: "bg-purple-100", border: "border-purple-400", text: "text-purple-950" },
+      { id: 10, base: "fall", past: "fell", bg: "bg-pink-100", border: "border-pink-400", text: "text-pink-950" }
+    ];
+
+    // Unique pill bank for past tense
+    const TANG_PILLS = [
+      { name: "ate", base: "eat" },
+      { name: "drank", base: "drink" },
+      { name: "went", base: "go" },
+      { name: "saw", base: "see" },
+      { name: "met", base: "meet" },
+      { name: "relaxed", base: "relax" },
+      { name: "read", base: "read" },
+      { name: "fell", base: "fall" }
+    ];
+
+    const tangSlotsState = { 2: null, 3: null, 4: null, 5: null, 6: null, 7: null, 8: null, 9: null, 10: null };
+    let selectedTangPill = null;
+
+    function renderTangWordBank() {
+      const bank = document.getElementById('tangVerbsWordBank');
+      bank.innerHTML = '';
+
+      TANG_PILLS.forEach(p => {
+        const pillDiv = document.createElement('div');
+        pillDiv.id = `tang-pill-${p.name}`;
+        pillDiv.className = "word-pill px-3.5 sm:px-4 py-1.5 rounded-2xl bg-white border-2 border-amber-400 text-amber-950 font-black en-font text-sm sm:text-base shadow-xs hover:bg-amber-100 transition";
+        pillDiv.setAttribute('draggable', 'true');
+        pillDiv.innerHTML = `<span>${p.name}</span> <span class="text-[10px] text-slate-400">(${p.base})</span>`;
+
+        pillDiv.onclick = () => {
+          sfx.playPop();
+          canadianSpeaker.speak(p.name);
+          handleTangPillSelect(p.name, pillDiv);
+        };
+
+        pillDiv.ondragstart = (e) => {
+          e.dataTransfer.setData("text/plain", p.name);
+          selectedTangPill = p.name;
+          sfx.playPop();
+        };
+
+        bank.appendChild(pillDiv);
+      });
+    }
+
+    function renderTangSlots() {
+      for (let slotId = 2; slotId <= 10; slotId++) {
+        const slotContainer = document.getElementById(`tang-slot-${slotId}`);
+        if (!slotContainer) continue;
+
+        const val = tangSlotsState[slotId];
+        const verbData = TANG_VERBS.find(v => v.id === slotId);
+
+        if (val) {
+          const isCorrect = (val.toLowerCase() === verbData.past.toLowerCase());
+          if (isCorrect) {
+            slotContainer.innerHTML = `
+              <span onclick="clearTangSlot(${slotId})" class="cursor-pointer inline-flex items-center gap-1 bg-emerald-100 border-2 border-emerald-500 text-emerald-950 px-2 py-0.5 rounded-lg font-black en-font text-xs sm:text-sm hover:bg-rose-100 transition" title="انقر للإزالة">
+                ${val} <span class="text-[10px] bg-emerald-600 text-white px-1 rounded-sm">✓</span>
+              </span>
+            `;
+          } else {
+            slotContainer.innerHTML = `
+              <span onclick="clearTangSlot(${slotId})" class="cursor-pointer inline-flex items-center gap-1 bg-rose-100 border-2 border-rose-400 text-rose-950 px-2 py-0.5 rounded-lg font-black en-font text-xs sm:text-sm line-through hover:bg-rose-200 transition" title="انقر للتصحيح">
+                ${val} <span class="text-[10px] bg-rose-600 text-white px-1 rounded-sm">✗</span>
+              </span>
+            `;
+          }
+        } else {
+          slotContainer.innerHTML = `
+            <span onclick="handleTangSlotClick(${slotId})" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="handleTangDrop(event, ${slotId})" class="drop-slot inline-block border-b-2 border-dashed border-teal-500 bg-teal-50/50 hover:bg-teal-100 px-2.5 py-0.5 rounded text-teal-800 text-xs font-bold cursor-pointer transition">
+              [ ..... ]
+            </span>
+          `;
+        }
+      }
+    }
+
+    function handleTangPillSelect(verb, el) {
+      if (selectedTangPill === verb) {
+        selectedTangPill = null;
+        el.classList.remove('selected-pill');
+      } else {
+        document.querySelectorAll('#tangVerbsWordBank .word-pill').forEach(p => p.classList.remove('selected-pill'));
+        selectedTangPill = verb;
+        el.classList.add('selected-pill');
+        showFeedbackToast(true, `تم اختيار الفعل (${verb}). انقر على الفراغ المناسب في القصة`);
+      }
+    }
+
+    function handleTangDrop(e, slotId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const verb = e.dataTransfer.getData("text/plain") || selectedTangPill;
+      if (verb) placeTangVerb(slotId, verb);
+    }
+
+    function handleTangSlotClick(slotId) {
+      if (selectedTangPill) {
+        placeTangVerb(slotId, selectedTangPill);
+      } else {
+        sfx.playPop();
+        showFeedbackToast(false, "اختر فعلاً ماضياً من الصندوق أولاً ثم انقر في الفراغ");
+      }
+    }
+
+    function clearTangSlot(slotId) {
+      sfx.playPop();
+      tangSlotsState[slotId] = null;
+      renderTangSlots();
+      updateScoreBadge();
+    }
+
+    function placeTangVerb(slotId, verb) {
+      const verbData = TANG_VERBS.find(v => v.id === slotId);
+      const isCorrect = (verb.toLowerCase() === verbData.past.toLowerCase());
+
+      tangSlotsState[slotId] = verb;
+      renderTangSlots();
+      updateScoreBadge();
+
+      if (isCorrect) {
+        sfx.playSuccess();
+        speakArabicFeedback(true, () => {
+          canadianSpeaker.speak(verb);
+        });
+        showFeedbackToast(true, `ممتاز! (${verb}) هو تصريف الماضي الصحيح للفعل (${verbData.base})`);
+        fireConfetti(0.3);
+      } else {
+        sfx.playError();
+        speakArabicFeedback(false);
+        showFeedbackToast(false, `إجابة خاطئة! (${verb}) ليس التصريف المناسب للفعل (${verbData.base}). انقر لإزالته`);
+      }
+    }
+
+    function readEntireTangStory() {
+      sfx.playPop();
+      const storyText = "Tang woke up on Sunday at 8 a.m. He ate pancakes with eggs for breakfast and drank orange juice. He went for a walk with Cha-Cha in the park. They saw a butterfly and met Hob and Bud. Later, he relaxed at home. He read his favorite book and then went to bed. He fell asleep at 8 p.m.";
+      
+      const btn = document.getElementById('readTangStoryBtn');
+      btn.innerHTML = `<span>⏹️</span><span>جارٍ الاستماع...</span>`;
+
+      canadianSpeaker.speak(storyText, () => {
+        btn.innerHTML = `<span>🔊</span><span>استمع للقصة كاملة</span>`;
+      });
+    }
+
+    /* =========================================================================
+       6. GLOBAL SCORE, VALIDATION, AND TRANSLATION CONTROLS
+       ========================================================================= */
+    function updateScoreBadge() {
+      let score = 0;
+      // Ex 1 score (6 points)
+      EX1_QUESTIONS.forEach(q => {
+        if (ex1SlotsState[q.id] === q.correct) score++;
+      });
+      // Ex 3 score (9 points)
+      TANG_VERBS.forEach(v => {
+        if (tangSlotsState[v.id] && tangSlotsState[v.id].toLowerCase() === v.past.toLowerCase()) score++;
+      });
+
+      document.getElementById('scoreDisplay').textContent = `${score} / 15`;
+
+      if (score === 15) {
+        fireConfetti(1.2);
+        showFeedbackToast(true, "تهانينا! حصلت على الدرجة الكاملة 15 من 15 🌟");
+      }
+    }
+
+    function checkAllWorksheetAnswers() {
+      sfx.playPop();
+      let ex1Correct = 0;
+      let tangCorrect = 0;
+
+      EX1_QUESTIONS.forEach(q => {
+        if (ex1SlotsState[q.id] === q.correct) ex1Correct++;
+      });
+      TANG_VERBS.forEach(v => {
+        if (tangSlotsState[v.id] && tangSlotsState[v.id].toLowerCase() === v.past.toLowerCase()) tangCorrect++;
+      });
+
+      const totalCorrect = ex1Correct + tangCorrect;
+
+      if (totalCorrect === 15) {
+        sfx.playSuccess();
+        speakArabicFeedback(true);
+        showFeedbackToast(true, "ما شاء الله! جميع إجاباتك صحيحة ومكتملة بنجاح 💯");
+        fireConfetti(1.0);
+      } else {
+        sfx.playError();
+        speakArabicFeedback(false);
+        showFeedbackToast(false, `لديك ${totalCorrect} إجابة صحيحة من أصل 15. قم بمراجعة الفراغات المتبقية`);
+      }
+    }
+
+    function resetWorksheet() {
+      sfx.playPop();
+      for (let i = 1; i <= 6; i++) ex1SlotsState[i] = null;
+      for (let i = 2; i <= 10; i++) tangSlotsState[i] = null;
+
+      selectedEx1Word = null;
+      selectedTangPill = null;
+      document.getElementById('notebookInput').value = '';
+
+      renderEx1Questions();
+      renderTangWordBank();
+      renderTangSlots();
+      updateScoreBadge();
+
+      showFeedbackToast(true, "تم مسح جميع الإجابات لإعادة حل ورقة العمل من جديد 🔄");
+    }
+
+    let translationsVisible = true;
+    function toggleTranslations() {
+      translationsVisible = !translationsVisible;
+      document.querySelectorAll('.arabic-sub').forEach(el => {
+        el.style.display = translationsVisible ? 'block' : 'none';
+      });
+      document.getElementById('transBtnText').textContent = translationsVisible ? "إخفاء الترجمة" : "إظهار الترجمة";
+    }
+
+    function fireConfetti(power = 0.5) {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: Math.floor(75 * power),
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    /* =========================================================================
+       INITIALIZATION
+       ========================================================================= */
+    window.onload = function() {
+      renderEx1Questions();
+      renderTangWordBank();
+      renderTangSlots();
+      updateScoreBadge();
+    };
+  </script>
+</body>
+</html>
